@@ -1,11 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.cache import cache
 from .models import Todo
 from .forms import TodoForm
+from todoapp.settings import CACHE_TTL
 # Create your views here.
 
 def index(request):
 
-    todo_list = Todo.objects.all()
+    todo_list = cache.get('todo_list')
+
+    if not todo_list:
+        todo_list = Todo.objects.all()
+        cache.set('todo_list', todo_list, CACHE_TTL)
 
     print(todo_list)
     return render(request, 'mainapp/index.html', {'todo_list': todo_list})
